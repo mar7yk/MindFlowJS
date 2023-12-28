@@ -1,0 +1,42 @@
+{
+  "name": "mindflow",
+  "version": "1.0.0",
+  "main": "mindFlow.js",
+  "scripts": {
+    "start": "node mindFlow.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mar7yk/AskJS.git"
+  },
+  "keywords": [
+    "logic"
+  ],
+  "type": "module",
+  "author": "Martin Kostov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mar7yk/AskJS/issues"
+  },
+  "homepage": "https://github.com/mar7yk/AskJS#readme",
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-node": "^4.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jest": "^27.6.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.1"
+  },
+  "jest": {
+    "transform": {}
+  },
+  "description": ""
+}
