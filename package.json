@@ -1,5 +1,5 @@
 {
-  "name": "mindflow",
+  "name": "mind-flow",
   "version": "1.0.0",
   "main": "mindFlow.js",
   "scripts": {
@@ -8,18 +8,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mar7yk/AskJS.git"
+    "url": "git+https://github.com/mar7yk/MindFlow.git"
   },
   "keywords": [
     "logic"
   ],
   "type": "module",
-  "author": "Martin Kostov",
+  "author": "Martin Kostov <martykostov@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mar7yk/AskJS/issues"
+    "url": "https://github.com/mar7yk/MindFlow/issues"
   },
-  "homepage": "https://github.com/mar7yk/AskJS#readme",
+  "homepage": "https://github.com/mar7yk/MindFlow#readme",
   "devDependencies": {
     "eslint": "^8.55.0",
     "eslint-config-airbnb": "^19.0.4",
