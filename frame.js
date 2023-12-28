@@ -22,7 +22,7 @@ export default class Frame extends List {
             result.push(value)
         }
 
-        return result.length ? result : true
+        return result
     }
 
     walk(variable) {

@@ -6,7 +6,8 @@ export { getVar }
 export function* ask(vars, goal, limit = Infinity) {
     let iter = 0
     for (const frame of goal()(new Frame())) {
-        yield frame.walkAll(vars)
+        const result = frame.walkAll(vars)
+        yield result.length ? result : true
         if (++iter === limit) return
     }
 }
@@ -42,13 +43,16 @@ export const not = constraint => () =>
 
 export const equal = (x, y) => () =>
     function* equalConstraint(frame) {
-        const a = frame.walk(x)
-        const b = frame.walk(y)
+        let a = frame.walk(x)
+        let b = frame.walk(y)
+
+        if (b.type === 'ask_logic_variable') [a, b] = [b, a]
 
         if (a === b) yield frame
-        else if (a.type === 'ask_logic_variable') yield frame.extend(a, b)
-        else if (b.type === 'ask_logic_variable') yield frame.extend(b, a)
-        else if (
+        else if (a.type === 'ask_logic_variable') {
+            if (b[Symbol.iterator] !== undefined) b = frame.walkAll(b)
+            yield frame.extend(a, b)
+        } else if (
             a[Symbol.iterator] !== undefined &&
             b[Symbol.iterator] !== undefined
         ) {
@@ -80,7 +84,7 @@ const equalIterable = (x, y) => () =>
 export const notEqual = (x, y) => not(equal(x, y))
 
 export const less = (x, y) => () =>
-    function* equalConstraint(frame) {
+    function* lessConstraint(frame) {
         const a = frame.walk(x)
         const b = frame.walk(y)
 
@@ -88,7 +92,7 @@ export const less = (x, y) => () =>
     }
 
 export const greater = (x, y) => () =>
-    function* equalConstraint(frame) {
+    function* greaterConstraint(frame) {
         const a = frame.walk(x)
         const b = frame.walk(y)
 
@@ -137,34 +141,108 @@ export const mul = (x, y, z) => () =>
 
 export const div = (x, y, z) => mul(z, y, x)
 
-export const nat = x => () =>
-    function* natConstraint(frame) {
-        for (let i = 0; ; i++) {
-            yield frame.extend(x, i)
-        }
+export const mod = (x, y, z) => () =>
+    function* addConstraint(frame) {
+        const a = frame.walk(x)
+        const b = frame.walk(y)
+        const c = frame.walk(z)
+
+        if (a.type === 'ask_logic_variable') return
+        if (b.type === 'ask_logic_variable') return
+
+        yield frame.extend(c, a % b)
     }
 
-export const int = x => () =>
-    function* intConstraint(frame) {
-        yield frame.extend(x, 0)
-        for (let i = 1; ; i++) {
-            yield frame.extend(x, i)
-            yield frame.extend(x, -i)
-        }
-    }
-
-export const between = (x, y, r) => () =>
+export const between = (begin, end, r) => () =>
     function* betweenConstraint(frame) {
-        for (let i = x; i <= y; i++) {
-            yield frame.extend(r, i)
+        const b = frame.walk(begin)
+        if (b.type === 'ask_logic_variable') return
+        const e = frame.walk(end)
+        if (e.type === 'ask_logic_variable') return
+
+        for (let i = b; i <= e; i++) {
+            yield* equal(r, i)()(frame)
         }
     }
 
-export const pairs = (x, y) => () =>
-    function* pairsConstraint(frame) {
-        for (let i = 0; ; i++) {
-            for (let j = 0; j <= i; j++) {
-                yield frame.extend(x, j).extend(y, i - j)
-            }
+export const nat = x => between(0, Infinity, x)
+
+export const num = x => between(1, Infinity, x)
+
+export function int(x) {
+    const x1 = getVar()
+    return or(equal(x, 0), and(num(x1), or(equal(x, x1), add(x, x1, 0))))
+}
+
+export function append(l, r, a) {
+    return () => or(and(equal(l, []), equal(r, a)))()
+}
+
+export const member = (list, item) => () =>
+    function* memberConstraint(frame) {
+        const l = frame.walk(list)
+        if (l[Symbol.iterator] === undefined) return
+        for (const i of l) {
+            yield* equal(item, i)()(frame)
         }
     }
+
+export const getMember = (input, output, parm) => () =>
+    function* getMemberConstraint(frame) {
+        const i = frame.walk(input)
+
+        if (i[parm] === undefined) return
+        const o = i[parm]
+
+        yield* equal(output, o)()(frame)
+    }
+
+const length = (list, x) => getMember(list, x, 'length')
+
+export const execMethod =
+    (input, output, methodName, ...parms) =>
+    () =>
+        function* execMethodConstraint(frame) {
+            const i = frame.walk(input)
+
+            if (i[methodName] === undefined) return
+            const o = i[methodName](...frame.walkAll(parms))
+            if (o === undefined) return
+
+            yield* equal(output, o)()(frame)
+        }
+
+export const execFunc =
+    (output, func, ...parms) =>
+    () =>
+        function* execFuncConstraint(frame) {
+            const o = func(...frame.walkAll(parms))
+            if (o === undefined) return
+
+            yield* equal(output, o)()(frame)
+        }
+
+function genTupleWhitSum(sum, ...items) {
+    const k1 = getVar()
+    const s1 = getVar()
+    const k = getVar()
+    return () =>
+        and(
+            length(items, k),
+            or(
+                and(equal(k, 1), equal(items[0], sum)),
+                and(
+                    less(1, k),
+                    sub(k, 1, k1),
+                    between(0, sum, items[0]),
+                    sub(sum, items[0], s1),
+                    genTupleWhitSum(s1, ...items.slice(1))
+                )
+            )
+        )()
+}
+
+export function tuple(...items) {
+    const sum = getVar()
+    return and(nat(sum), genTupleWhitSum(sum, ...items))
+}
