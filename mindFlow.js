@@ -188,10 +188,6 @@ export function int(x) {
     return or(equal(x, 0), and(num(x1), or(equal(x, x1), add(x, x1, 0))))
 }
 
-export function append(l, r, a) {
-    return () => or(and(equal(l, []), equal(r, a)))()
-}
-
 export const member = (list, item) => () =>
     function* memberConstraint(frame) {
         const l = frame.walk(list)
