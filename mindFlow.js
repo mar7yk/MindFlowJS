@@ -36,6 +36,20 @@ export const or =
             }
         }
 
+export const oneOf =
+    (...constraints) =>
+    () =>
+        function* oneOfConstraint(frame) {
+            for (const constraint of constraints) {
+                let isGood = false
+                for (const newFrame of constraint()(frame)) {
+                    isGood = true
+                    yield newFrame
+                }
+                if (isGood) return
+            }
+        }
+
 export const not = constraint => () =>
     function* notConstraint(frame) {
         if (constraint()(frame).next().done) yield frame
@@ -223,17 +237,14 @@ export const execFunc =
         }
 
 function genTupleWhitSum(sum, ...items) {
-    const k1 = getVar()
     const s1 = getVar()
     const k = getVar()
     return () =>
         and(
             length(items, k),
-            or(
+            oneOf(
                 and(equal(k, 1), equal(items[0], sum)),
                 and(
-                    less(1, k),
-                    sub(k, 1, k1),
                     between(0, sum, items[0]),
                     sub(sum, items[0], s1),
                     genTupleWhitSum(s1, ...items.slice(1))
