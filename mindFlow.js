@@ -110,9 +110,9 @@ export const greater = (x, y) => () =>
         if (a > b) yield frame
     }
 
-export const lessOrEqual = (x, y) => greater(y, x)
+export const lessOrEqual = (x, y) => not(greater(x, y))
 
-export const greaterOrEqual = (x, y) => less(y, x)
+export const greaterOrEqual = (x, y) => not(less(x, y))
 
 export const add = (x, y, z) => () =>
     function* addConstraint(frame) {
