@@ -64,12 +64,9 @@ export const equal = (x, y) => () =>
 
         if (a === b) yield frame
         else if (a.type === 'ask_logic_variable') {
-            if (b[Symbol.iterator] !== undefined) b = frame.walkAll(b)
+            if (Array.isArray(b)) b = frame.walkAll(b)
             yield frame.extend(a, b)
-        } else if (
-            a[Symbol.iterator] !== undefined &&
-            b[Symbol.iterator] !== undefined
-        ) {
+        } else if (Array.isArray(a) && Array.isArray(b)) {
             // eslint-disable-next-line no-use-before-define
             yield* equalIterable(a, b)()(frame)
         }
@@ -191,7 +188,7 @@ export function int(x) {
 export const member = (list, item) => () =>
     function* memberConstraint(frame) {
         const l = frame.walk(list)
-        if (l[Symbol.iterator] === undefined) return
+        if (!Array.isArray(l)) return
         for (const i of l) {
             yield* equal(item, i)()(frame)
         }

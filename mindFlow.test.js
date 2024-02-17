@@ -6,6 +6,7 @@ import {
     equal,
     less,
     mul,
+    between,
     nat,
     notEqual,
     or,
@@ -129,6 +130,18 @@ test('nat(x)', () => {
     expect(answers.next().value).toEqual([1])
     expect(answers.next().value).toEqual([2])
     expect(answers.next().done).toBe(false)
+})
+
+test('between(1, 3)', () => {
+    const x = getVar()
+    const y = getVar()
+    const z = getVar()
+    const answers = ask([x], and(equal(y, 1), equal(z, 3), between(y, z, x)))
+
+    expect(answers.next().value).toEqual([1])
+    expect(answers.next().value).toEqual([2])
+    expect(answers.next().value).toEqual([3])
+    expect(answers.next().done).toBe(true)
 })
 
 test('int(x)', () => {
