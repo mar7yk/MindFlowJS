@@ -1,6 +1,6 @@
 {
   "name": "mind-flow-js",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "main": "mindFlow.js",
   "scripts": {
     "start": "node mindFlow.js",
