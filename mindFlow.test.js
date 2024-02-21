@@ -17,7 +17,8 @@ import {
     member,
     execFunc,
     tuple,
-    mod
+    mod,
+    check
 } from './mindFlow.js'
 
 test('if x = 5 then x = 5', () => {
@@ -90,6 +91,14 @@ test('if x = 25 % 7 then x = 4', () => {
 
     expect(answers.next().value).toEqual([4])
     expect(answers.next().done).toBe(true)
+})
+
+test('if 25 % 7 = 4', () => {
+    expect(check(mod(25, 7, 4))).toEqual(true)
+})
+
+test('if 25 % 7 != 5', () => {
+    expect(check(mod(25, 7, 5))).toEqual(false)
 })
 
 test('if [x, [8, z, 10], []] = [4, [y, 1, 10], []] then x = 4 and y = 8, z = 1', () => {

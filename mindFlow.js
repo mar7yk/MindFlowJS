@@ -161,7 +161,8 @@ export const mod = (x, y, z) => () =>
         if (a.type === 'ask_logic_variable') return
         if (b.type === 'ask_logic_variable') return
 
-        yield frame.extend(c, a % b)
+        if (a % b === c) yield frame
+        else if (c.type === 'ask_logic_variable') yield frame.extend(c, a % b)
     }
 
 export const between = (begin, end, r) => () =>
